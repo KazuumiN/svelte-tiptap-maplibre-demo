@@ -3,6 +3,7 @@
 	import type { Content } from '@tiptap/core';
 	import { Editor } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
+	import { SvelteCounterExtension } from './SvelteExtension';
 
 	let editor = $state<Editor>();
 	let element = $state<HTMLElement>();
@@ -19,6 +20,7 @@
 			content,
 			extensions: [
                 StarterKit,
+                SvelteCounterExtension, // Counter拡張機能として追加
             ],
 			editorProps: {
 				attributes: {
@@ -26,8 +28,9 @@
 					class: 'prose max-w-full'
 				}
 			},
-			onTransaction: ({ editor }) => {
-				content = editor.getJSON();
+			onTransaction: (transaction) => {
+                editor = transaction.editor;
+                content = editor.getJSON();
 			}
 		});
 	});
@@ -37,6 +40,22 @@
 			editor.destroy();
 		}
 	});
+
+    const addCounter = () => {
+        if (!editor) return;
+        // editorインスタンスにSvelteCounterComponentを挿入
+		editor
+			.chain()
+			.insertContent({
+				type: 'SvelteCounterComponent',
+			})
+			.focus()
+			.run();
+	}
 </script>
+
+<button onclick={addCounter} class="bg-blue-500 text-white px-4 py-2 rounded">
+    カウンターを追加
+</button>
 
 <div bind:this={element} class="border-2"></div>
